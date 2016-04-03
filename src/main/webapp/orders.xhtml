@@ -1,0 +1,61 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui">
+    <h:head>
+        <title>Facelet Title</title>
+    </h:head>
+    <h:body>
+
+        <p:growl widgetVar="growl" autoUpdate="true" showDetail="true" redisplay="true" transient="false" showSummary="true" sticky="true"/>
+        <h:form id="form">
+            <p:remoteCommand name="updateList" actionListener="#{resMB.update()}" process="@this"/>
+            <p:dataTable value="#{resMB.orderses}" var="order" lazy="true"
+                         paginator="true"
+                         rows="5"
+                         paginatorTemplate="{RowsPerPageDropdown} {FirstPageLink} {PreviousPageLink} {CurrentPageReport} {NextPageLink} {LastPageLink}"
+                         rowsPerPageTemplate="5,10,100"
+                         >
+                <p:ajax event="rowToggle" update="summaryRow"/>
+                <p:column style="width:16px">
+                    <p:rowToggler />
+                </p:column>
+                <p:column sortBy="#{order.tableNo}" headerText="Table NO">
+                    <p:outputLabel value="#{order.tableNo}" />
+                </p:column>
+
+                <p:column headerText="Done">
+                    <p:outputLabel value="#{order.done}" />
+                </p:column>
+
+                <p:column headerText="Time of Order">
+                    <p:outputLabel value="#{order.timeOfOrder}" />
+                </p:column>
+                <p:rowExpansion>
+                    <p:dataTable value="#{order.orderdetailCollection}" id="summaryRow" var="orderDetail" >
+                        <p:column headerText="Food Names" >
+                            <p:outputLabel value="#{orderDetail.foodDetFK.name}"/>
+                        </p:column>
+                        <p:column headerText="Quantity" >
+                            <p:outputLabel value="#{orderDetail.quantity}"/>
+                        </p:column>
+                    </p:dataTable>
+                </p:rowExpansion>
+            </p:dataTable>
+
+        </h:form>
+
+        <p:socket onMessage="handleMessage" channel="/orderpush" />
+
+        <script type="text/javascript">
+            function handleMessage(data) {
+                updateList();
+                PF('growl').show([data]);
+            }
+        </script>
+
+
+    </h:body>
+</html>
+

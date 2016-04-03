@@ -1,0 +1,90 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"  
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <h:head>
+    </h:head>
+    <h:body>
+        <h:form id="resuarantForm">
+            <p:layout style="min-width:400px;min-height:200px;">
+                <p:layoutUnit position="west" resizable="true" size="150" minSize="40" maxSize="200">
+                    <p:dataTable id ="category" value="#{resMB.foodCategory}" var="master" rowKey="#{master.name}"
+                                 selectionMode="single" selection="#{resMB.selectedCat}">
+                        <p:ajax event="rowSelect" update=":resuarantForm:details" listener="#{resMB.onFoodCatChange(master)}"/>
+                        <p:column headerText="Category">
+                            <h:outputText value="#{master.name}" />
+                        </p:column>
+                    </p:dataTable>
+                </p:layoutUnit>
+                <p:layoutUnit position="center" >
+                    <p:dataTable var="detail" value="#{resMB.fooddetails}" id="details"
+                                 rowKey="#{detail.detID}"
+                                 selectionMode="multiple" selection="#{resMB.selectedFoodDetails}">
+                        <p:column headerText="Name">
+                            <h:outputText value="#{detail.name}" />
+                        </p:column>
+                        <p:column headerText="price">
+                            <h:outputText value="#{detail.price}" />
+                        </p:column>
+                        <p:column headerText="detail">
+                            <h:outputText value="#{detail.details}" />
+                        </p:column>
+                        <p:column headerText="time">
+                            <h:outputText value="#{detail.timeout}" />
+                        </p:column>
+                        <p:column headerText="available">
+                            <h:outputText value="#{detail.available}" />
+                        </p:column>
+                    </p:dataTable>
+                </p:layoutUnit>
+                <p:layoutUnit position="east" resizable="true" size="250" minSize="40" maxSize="200">
+                    Selected 
+                    <p:dataTable id="order" var="orderDetail" value="#{resMB.orderInstance.orderdetailCollection}" selectionMode="multiple" 
+                                 selection="#{resMB.selectedOrderToRemove}" rowKey="#{orderDetail.foodDetFK.detID}" editable="true" editMode="cell">
+                        <p:column headerText="Name">
+                            <h:outputText value="#{orderDetail.foodDetFK.name}" />
+                        </p:column>
+                        <p:column headerText="quantity">
+                            <p:cellEditor>
+                                <f:facet name="output">
+                                    <h:outputText value="#{orderDetail.quantity}" />
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{orderDetail.quantity}" />
+                                </f:facet>
+                            </p:cellEditor>
+                        </p:column>
+                        <f:facet name="footer">
+                            Table No:  <p:inputText value="#{resMB.orderInstance.tableNo}"/>
+                        </f:facet>
+                    </p:dataTable>
+                </p:layoutUnit>
+            </p:layout>
+            <p:commandButton value="ADD" id="add" update=":resuarantForm:order" styleClass="ui-priority-primary" action="#{resMB.addToOrder()}" />
+            <p:commandButton value="Remove" id="remove" update=":resuarantForm:order" styleClass="ui-priority-primary" actionListener="#{resMB.removeSelected()}"/>
+            <p:commandButton value="Submit Order" action="#{resMB.countTotal()}"  oncomplete="PF('orderDialog').show()" update=":resuarantForm:order :resuarantForm:finalOrderPanel"/>
+            <p:dialog header="Selected order" widgetVar="orderDialog" modal="true" showEffect="fade" hideEffect="fade" resizable="false" width="200">
+                <p:outputPanel id="finalOrderPanel" style="text-align:center;">
+                    <p:dataTable id="finalOrderDT" var="finalOrder" value="#{resMB.orderInstance.orderdetailCollection}">
+                        <p:column headerText="Name">
+                            <h:outputText value="#{finalOrder.foodDetFK.name}" />
+                        </p:column>
+                        <p:column headerText="Name">
+                            <h:outputText value="#{finalOrder.quantity}" />
+                        </p:column>
+                    </p:dataTable>
+                    <h:outputText value="total:  #{resMB.orderInstance.total}"/>
+                    <p:commandButton value="Submit Order" action="#{resMB.submitOrder()}" update=":resuarantForm:order :resuarantForm:finalOrderPanel" oncomplete="PF('orderDialog').hide()">
+                        <p:confirm header="Confirmation" message="Are you sure?" icon="ui-icon-alert" />
+                    </p:commandButton>
+                    <p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+                        <p:commandButton value="Yes" type="button" styleClass="ui-confirmdialog-yes" icon="ui-icon-check" />
+                        <p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close" />
+                    </p:confirmDialog>
+                </p:outputPanel>
+            </p:dialog>
+        </h:form>
+    </h:body>
+</html>
